@@ -14,7 +14,8 @@ class RTLAgent(SARBaseAgent):
         self.team_status = {}
         self.op_chief = {}
 
-    def process_request(self, message, status=None, member=None):
+
+        def process_request(self, message, status=None, member=None):
         """process Team based requests"""
         try:
             if "get_team_members" in message:
