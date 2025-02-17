@@ -18,3 +18,5 @@ update_operation_status(status="Status_Here"): Updates the internal operations s
 add_team_member(member): Adds a new member to the team, and notifies all team members of the new teammate
 
 get_team_members, get_op_status, get_team_status: Returns the list of team members, operation status, and team status respectively
+
+notify_team(message): Makes a call to google's Gemini API to generate a human readable message, alongside safety and efficiency recommendations.
