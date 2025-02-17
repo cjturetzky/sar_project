@@ -19,3 +19,9 @@ class TestRTLAgent:
         assert response == "Operation Cleared"
         assert agent.mission_status == "Off-Duty"
 
+    def test_notify_team(self, agent):
+        message = ("Lost Hiker: 25 yrs old, female, red hair, wearing green puffer jacket. Nightfall in 1 hour, "
+                   "high winds expected.")
+        response = agent.notify_team(message)
+        print(response.text)
+        assert response
