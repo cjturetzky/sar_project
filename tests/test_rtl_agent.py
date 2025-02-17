@@ -19,6 +19,15 @@ class TestRTLAgent:
         assert response == "Operation Cleared"
         assert agent.mission_status == "Off-Duty"
 
+    def test_new_op(self, agent):
+        message = {
+            "new_op":True
+        }
+        response = agent.process_request(message, members=["CJ", "Franz", "Neeraja"])
+        assert response == "Operation Created; Previous Operation Cleared"
+        assert agent.mission_status == "Planning Operation"
+        assert len(agent.team_members) == 3
+
     def test_notify_team(self, agent):
         message = ("Lost Hiker: 25 yrs old, female, red hair, wearing green puffer jacket. Nightfall in 1 hour, "
                    "high winds expected.")

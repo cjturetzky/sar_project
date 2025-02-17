@@ -1,4 +1,5 @@
 from sar_project.agents.base_agent import SARBaseAgent
+from sar_project.agents.rescuer_agent import RescuerAgent
 from google import genai
 import os
 from dotenv import load_dotenv, dotenv_values
@@ -21,7 +22,7 @@ class RTLAgent(SARBaseAgent):
         self.op_chief = {}
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
-    def process_request(self, message, status=None, member=None):
+    def process_request(self, message, status=None, member=None, members=[]):
         """process Team based requests"""
         try:
             if "get_team_members" in message:
@@ -34,7 +35,7 @@ class RTLAgent(SARBaseAgent):
                 self.clear_op()
                 return "Operation Cleared"
             elif "new_op" in message:
-                self.new_op()
+                self.new_op(members)
                 return "Operation Created; Previous Operation Cleared"
             elif "update_team_status" in message:
                 self.update_team_status(status)
@@ -55,7 +56,7 @@ class RTLAgent(SARBaseAgent):
 
     def new_op(self, team_members):
         self.clear_op()
-        self.update_status("New Operation: Planning")
+        self.update_team_status("New Operation: Planning")
         self.update_status("Planning Operation")
         for member in team_members:
             self.add_team_member(member)
@@ -65,7 +66,8 @@ class RTLAgent(SARBaseAgent):
     def update_status(self, status):
         """Update agent's mission status"""
         self.mission_status = status
-        self.notify_team("Mission status updated: " + status)
+        message = self.generate_message("Mission status updated: " + status)
+        self.notify_team(message)
         return {"status": "updated", "new_status": status}
 
     def get_status(self):
@@ -77,9 +79,9 @@ class RTLAgent(SARBaseAgent):
         self.notify_team("Team status updated: " + status)
         return {"team_status": "updated", "new_team_status": status}
 
-    def add_team_member(self, rescuer):
-        self.team_members.append(rescuer)
-        self.notify_team("New Team Member added: " + rescuer)
+    def add_team_member(self, rescuer_name):
+        self.team_members.append(RescuerAgent(name=rescuer_name))
+        self.notify_team("New Team Member added: " + rescuer_name)
         return {"team_member_added": True}
 
     def get_team_members(self):
@@ -90,9 +92,15 @@ class RTLAgent(SARBaseAgent):
 
     def notify_team(self, message):
         """Not yet implemented; Will create a dummy Rescuer agent that can receive messages"""
+        for member in self.team_members:
+            member.message(message)
+        return "Message sent"
+
+
+    def generate_message(self, message):
         response = self.client.models.generate_content(
-            model = "gemini-2.0-flash",
-            contents = "Notify a team of rescuers of the message: \"" + message +
-                       "\", and provide recommendations for safety and efficiency."
+            model="gemini-2.0-flash",
+            contents="Notify a team of rescuers of the message: \"" + message +
+                     "\", and provide recommendations for safety and efficiency."
         )
-        return response
+        return response.text
