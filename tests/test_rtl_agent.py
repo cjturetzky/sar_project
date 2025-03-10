@@ -34,3 +34,13 @@ class TestRTLAgent:
         response = agent.notify_team(message)
         print(response.text)
         assert response
+
+    def test_add_members(self, agent):
+        member = "CJ"
+        response = agent.add_team_member(member)
+        assert response["team_member_added"]
+    def test_multiple_members(self, agent):
+        member = "CJ"
+        agent.add_team_member(member)
+        response = agent.add_team_member(member)
+        assert not response["team_member_added"]

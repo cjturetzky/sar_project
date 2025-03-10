@@ -45,7 +45,8 @@ class RTLAgent(SARBaseAgent):
                 self.add_team_member(member)
 
         except Exception as e:
-            return {"error":str(e)}
+            return {"error":str(e),
+                    "description": "Error in processing request. Please ensure your request contains a valid command."}
 
     def clear_op(self):
         self.update_status("Off-Duty")
@@ -72,7 +73,7 @@ class RTLAgent(SARBaseAgent):
 
     def get_status(self):
         """Return current status"""
-        return getattr(self, "status", "Unknown")
+        return getattr(self, "status", "No Status Set. Please update Status manually.")
 
     def update_team_status(self, status):
         self.team_status = status
@@ -80,15 +81,20 @@ class RTLAgent(SARBaseAgent):
         return {"team_status": "updated", "new_team_status": status}
 
     def add_team_member(self, rescuer_name):
+        for a in self.team_members:
+            if a.name == rescuer_name:
+                return {"team_member_added": False,
+                        "reason": "Team member already present"}
+
         self.team_members.append(RescuerAgent(name=rescuer_name))
         self.notify_team("New Team Member added: " + rescuer_name)
         return {"team_member_added": True}
 
     def get_team_members(self):
-        return getattr(self, "team_members", "Unknown")
+        return getattr(self, "team_members", "No Team Members present. Please add team members.")
 
     def get_team_status(self):
-        return getattr(self, "team_status", "Unknown")
+        return getattr(self, "team_status", "No Status present. Please update status.")
 
     def notify_team(self, message):
         """Not yet implemented; Will create a dummy Rescuer agent that can receive messages"""
